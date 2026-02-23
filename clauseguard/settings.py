@@ -118,15 +118,23 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 AI_API_KEY = os.environ.get('AI_API_KEY', '')
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-# Email settings for production
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # or your email provider
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-DEFAULT_FROM_EMAIL = 'ClauseGuard <noreply@clauseguard.com>'
+# Email settings for Render
+if 'RENDER' in os.environ:  # Check if running on Render
+    # SendGrid configuration
+    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
+    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+    
+    # Default from email
+    DEFAULT_FROM_EMAIL = 'noreply@your-domain.com'
+else:
+    # Local development with Gmail
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 # Celery Configuration
 CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0')
