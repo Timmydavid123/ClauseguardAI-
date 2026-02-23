@@ -1,0 +1,42 @@
+services:
+  - type: web
+    name: clauseguard-web
+    runtime: docker
+    repo: https://github.com/Timmydavid123/clauseguard  # Replace with your repo URL
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    envVars:
+      - key: AI_API_KEY
+        sync: false  # Will be set manually in Render dashboard
+      - key: ANTHROPIC_MODEL
+        value: claude-3-haiku-20240307
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: clauseguard-redis
+          property: connectionString
+
+  - type: redis
+    name: clauseguard-redis
+    ipAllowList: []  # Allow only internal connections
+    plan: free  # or starter for production
+
+  - type: worker
+    name: clauseguard-worker
+    runtime: docker
+    repo: https://github.com/Timmydavid123/clauseguard
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    command: celery -A clauseguard worker --loglevel=info
+    envVars:
+      - key: AI_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-3-haiku-20240307
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: clauseguard-redis
+          property: connectionString
