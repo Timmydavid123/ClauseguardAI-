@@ -1,0 +1,89 @@
+{% extends "analyzer/base.html" %}
+{% load static %}
+
+{% block title %}ClauseGuard — Know What You're Signing{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-eyebrow">Powered by Advanced AI</div>
+  <h1>Know What You're<br><em>Signing.</em></h1>
+  <p>Upload any contract and get an instant AI-powered risk analysis — plain English, no legal jargon.</p>
+</section>
+
+<div class="upload-container">
+
+  <div class="upload-zone" id="drop-zone">
+    <div class="upload-zone-inner">
+      <span class="upload-icon">📄</span>
+      <div class="upload-title">Drop your contract here</div>
+      <!-- UPDATE 1: Change the subtitle to show all supported formats -->
+      <div class="upload-sub">Documents up to 10MB (PDF, DOCX, DOC, TXT, RTF, ODT)</div>
+      <!-- UPDATE 2: Update the accept attribute to include all document types -->
+      <input type="file" id="file-input" accept=".pdf,.docx,.doc,.txt,.rtf,.odt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,application/rtf,application/vnd.oasis.opendocument.text" hidden/>
+      <button type="button" class="btn btn-primary" onclick="document.getElementById('file-input').click()">
+        📁 Browse Document
+      </button>
+    </div>
+  </div>
+
+  <div class="divider"><span>or paste contract text</span></div>
+
+  <div class="text-panel">
+    <textarea id="contract-text" placeholder="Paste the full contract text here..." rows="8"></textarea>
+    <div class="text-panel-footer">
+      <span class="char-count" id="char-count">0 characters</span>
+      <button class="btn btn-accent" onclick="submitText()">⚡ Analyze Contract</button>
+    </div>
+  </div>
+
+  <div class="alert alert-error" id="error-box" style="display:none"></div>
+
+<!-- ── LOADING OVERLAY ─────────────────────────────────────────────────── -->
+  <div class="loading-overlay" id="loading-overlay" style="display: none;">
+      <div class="loading-card">
+          <div class="spinner"></div>
+          <div class="loading-title">Analyzing your contract...</div>
+          <div class="loading-sub">Our AI engine is reviewing every clause</div>
+          <ul class="loading-steps">
+              <li data-delay="0">Extracting contract text...</li>
+              <li data-delay="600">Identifying parties and clauses...</li>
+              <li data-delay="1200">Scanning for risk patterns...</li>
+              <li data-delay="1900">Evaluating liability exposure...</li>
+              <li data-delay="2600">Checking for missing protections...</li>
+              <li data-delay="3300">Generating risk report...</li>
+          </ul>
+      </div>
+  </div>
+
+{% if recent %}
+<section class="recent-section">
+  <div class="section-header">
+    <h2 class="section-title">📋 Recent Analyses</h2>
+    <a href="/history/" class="view-all">View all →</a>
+  </div>
+  <div class="recent-grid">
+    {% for c in recent %}
+    <a href="/results/{{ c.id }}/" class="recent-card">
+      <div class="recent-card-top">
+        <span class="severity-badge sev-{{ c.overall_risk_level|lower }}">{{ c.overall_risk_level }}</span>
+        <span class="recent-score">{{ c.overall_risk_score }}/100</span>
+      </div>
+      <div class="recent-filename">{{ c.filename }}</div>
+      <div class="recent-date">{{ c.created_at|date:"M d, Y" }}</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Make Django template variables available globally
+  window.ANALYZE_DOCUMENT_URL = "{% url 'analyze_document' %}";
+  window.ANALYZE_TEXT_URL = "{% url 'analyze_text' %}";
+</script>
+<!-- Include main.js - it will use the global variables -->
+<script src="{% static 'analyzer/js/main.js' %}"></script>
+{% endblock %}

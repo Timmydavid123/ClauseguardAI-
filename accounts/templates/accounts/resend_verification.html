@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resend Verification — ClauseGuard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Mono:wght@400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'analyzer/css/main.css' %}"/>
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<div class="auth-wrapper">
+  <a href="/" class="logo auth-logo">
+    <div class="logo-icon">✉️</div>
+    <div class="logo-text">Clause<span>Guard</span></div>
+  </a>
+
+  <div class="auth-card">
+    <h1 class="auth-title">Resend Verification Email</h1>
+    <p class="auth-sub">Enter your email to receive a new verification link</p>
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'resend_verification' %}" class="auth-form">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" class="form-input" placeholder="your@email.com" required autofocus/>
+      </div>
+      <button type="submit" class="btn btn-accent btn-full">Resend Verification Email</button>
+    </form>
+
+    <div class="auth-divider"><span>or</span></div>
+
+    <div class="auth-footer">
+      <a href="{% url 'login' %}">Back to Login</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

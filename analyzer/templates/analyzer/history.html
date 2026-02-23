@@ -1,0 +1,93 @@
+{% extends "analyzer/base.html" %}
+
+{% block title %}History — ClauseGuard{% endblock %}
+
+{% block content %}
+<div class="history-wrapper">
+
+  <div class="history-header">
+    <h1 class="results-title">📋 Your Contract History</h1>
+    <a href="/dashboard" class="btn btn-primary">+ New Analysis</a>
+  </div>
+
+  {% if contracts %}
+  <div class="history-table-wrap">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Contract</th>
+          <th>Risk Level</th>
+          <th>Score</th>
+          <th>Risks Found</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in contracts %}
+        <tr>
+          <td class="contract-name">
+            <a href="/results/{{ c.id }}/">{{ c.filename }}</a>
+          </td>
+          <td><span class="severity-badge sev-{{ c.overall_risk_level|lower }}">{{ c.overall_risk_level }}</span></td>
+          <td class="score-cell score-{{ c.overall_risk_level|lower }}">{{ c.overall_risk_score }}/100</td>
+          <td>{{ c.risks.count }}</td>
+          <td class="date-cell">{{ c.created_at|date:"M d, Y" }}</td>
+          <td class="actions-cell">
+            <a href="/results/{{ c.id }}/" class="action-btn">View</a>
+            <button class="action-btn action-btn--danger" onclick="deleteContract({{ c.id }}, this)">Delete</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-history">
+    <div class="empty-icon">📂</div>
+    <div class="empty-title">No contracts analyzed yet</div>
+    <div class="empty-sub">Upload your first contract to get started.</div>
+    <a href="/" class="btn btn-accent" style="margin-top:1.5rem">Analyze a Contract</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CSRF_TOKEN = "{{ csrf_token }}";
+
+async function deleteContract(id, btn) {
+  if (!confirm('Delete this contract and all its data?')) return;
+  
+  try {
+    const response = await fetch(`/contract/${id}/delete/`, {
+      method: 'POST',
+      headers: { 
+        'X-CSRFToken': CSRF_TOKEN,
+        'Accept': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok && data.success) {
+      // Remove the row from table
+      btn.closest('tr').remove();
+      
+      // If no contracts left, show empty state
+      const tbody = document.querySelector('tbody');
+      if (tbody && tbody.children.length === 0) {
+        window.location.reload(); // Or redirect to show empty state
+      }
+    } else {
+      alert('Failed to delete contract: ' + (data.error || 'Unknown error'));
+    }
+  } catch (err) {
+    console.error('Delete error:', err);
+    alert('Failed to delete contract. Please try again.');
+  }
+}
+</script>
+{% endblock %}

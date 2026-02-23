@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invalid Verification Link — ClauseGuard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Mono:wght@400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{% static 'analyzer/css/main.css' %}"/>
+</head>
+<body>
+<div class="noise-overlay"></div>
+
+<div class="auth-wrapper">
+  <a href="/" class="logo auth-logo">
+    <div class="logo-icon">⚠️</div>
+    <div class="logo-text">Clause<span>Guard</span></div>
+  </a>
+
+  <div class="auth-card">
+    <h1 class="auth-title">Invalid Link</h1>
+    
+    <div class="error-icon">!</div>
+    
+    <p class="auth-sub" style="margin-bottom: 2rem;">
+      The verification link is invalid or has expired.<br>
+      Please request a new verification email.
+    </p>
+
+    <a href="{% url 'resend_verification' %}" class="btn btn-accent btn-full">Resend Verification Email</a>
+    
+    <div class="auth-footer" style="margin-top: 1rem;">
+      <a href="{% url 'login' %}">Return to Login</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>
