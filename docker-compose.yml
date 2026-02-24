@@ -7,24 +7,28 @@ services:
     restart: always
     networks:
       - clauseguard-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   web:
     build: .
     container_name: clauseguard-web
-    command: >
-      sh -c "python manage.py migrate &&
-             gunicorn clauseguard.wsgi:application --bind 0.0.0.0:8000 --workers 2 --timeout 30"
-    ports:
-      - "8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379/0
       - AI_API_KEY=${AI_API_KEY}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL}
+      - SERVICE_TYPE=web  # Explicitly set service type
     volumes:
-      - ./db.sqlite3:/app/db.sqlite3  # Persist SQLite database
-      - ./media:/app/media  # Persist uploaded files
+      - ./db.sqlite3:/app/db.sqlite3
+      - ./media:/app/media
+    ports:
+      - "8000:8000"
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - clauseguard-network
     restart: always
@@ -32,20 +36,21 @@ services:
   worker:
     build: .
     container_name: clauseguard-worker
-    command: celery -A clauseguard worker --loglevel=info
     environment:
       - REDIS_URL=redis://redis:6379/0
       - AI_API_KEY=${AI_API_KEY}
       - ANTHROPIC_MODEL=${ANTHROPIC_MODEL}
+      - SERVICE_TYPE=worker  # Explicitly set service type
     volumes:
-      - ./db.sqlite3:/app/db.sqlite3  # Same database file
-      - ./media:/app/media  # Same media files
+      - ./db.sqlite3:/app/db.sqlite3
+      - ./media:/app/media
     depends_on:
-      - redis
-      - web
+      redis:
+        condition: service_healthy
     networks:
       - clauseguard-network
     restart: always
+    # No command override needed - the script handles it via SERVICE_TYPE
 
 networks:
   clauseguard-network:
