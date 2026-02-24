@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'accounts',
     'analyzer',
     'chat',
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -118,23 +119,28 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 AI_API_KEY = os.environ.get('AI_API_KEY', '')
 
 
-# Email settings for Render
-if 'RENDER' in os.environ:  # Check if running on Render
-    # SendGrid configuration
-    EMAIL_BACKEND = 'sendgrid_backend.SendgridBackend'
-    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
-    SENDGRID_SANDBOX_MODE_IN_DEBUG = False
+# Resend (via Anymail) configuration
+if 'RENDER' in os.environ:  # On Render
+    EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
     
-    # Default from email
-    DEFAULT_FROM_EMAIL = 'noreply@your-domain.com'
-else:
-    # Local development with Gmail
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+    ANYMAIL = {
+        "RESEND_API_KEY": os.environ.get('RESEND_API_KEY'),
+    }
+else:  # Local development
+    # Option A: Use console backend for local (no actual emails sent)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    
+    # Option B: If you want to test actual sending locally, use Resend too
+    # EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+    # ANYMAIL = {
+    #     "RESEND_API_KEY": os.environ.get('RESEND_API_KEY'),
+    # }
+
+# Default from email - MUST be from your verified domain
+DEFAULT_FROM_EMAIL = 'noreply@your-verified-domain.com'
+
+# Optional: Set a timeout (in seconds)
+EMAIL_TIMEOUT = 10
 
 # Celery Configuration
 CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0')
