@@ -137,7 +137,7 @@ else:  # Local development
     # }
 
 # Default from email - MUST be from your verified domain
-DEFAULT_FROM_EMAIL = 'adeleketimileyin11@gmail.com'
+DEFAULT_FROM_EMAIL = "ClauseGuard <onboarding@resend.dev>"
 
 # Optional: Set a timeout (in seconds)
 EMAIL_TIMEOUT = 10
