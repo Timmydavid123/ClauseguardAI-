@@ -150,37 +150,10 @@ EMAIL_TIMEOUT = 10
 # Determine if we're running on Render
 ON_RENDER = os.environ.get('RENDER', False) or os.environ.get('RENDER_WORKER', False)
 
-# Redis URL - Render provides this automatically
-REDIS_URL = os.environ.get('REDIS_URL', 'redis://redis:6379/0')
 
-# For Render, we need to handle the Redis URL differently
-if ON_RENDER:
-    # On Render, Redis URL is provided and might use rediss:// (SSL)
-    # No modification needed, just use as-is
-    CELERY_BROKER_URL = REDIS_URL
-    CELERY_RESULT_BACKEND = REDIS_URL
-else:
-    # Local Docker development
-    # Use the service name 'redis' as hostname
-    CELERY_BROKER_URL = 'redis://redis:6379/0'
-    CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
-
-# Add retry settings for both environments
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELERY_BROKER_CONNECTION_RETRY = True
-CELERY_BROKER_CONNECTION_MAX_RETRIES = 100
-
-# Redis connection pool settings
-CELERY_REDIS_MAX_CONNECTIONS = 20
-CELERY_REDIS_RETRY_ON_TIMEOUT = True
-CELERY_REDIS_SOCKET_TIMEOUT = 5
-CELERY_REDIS_SOCKET_CONNECT_TIMEOUT = 5
-
-# Existing Celery settings
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60
-CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "clauseguard-cache"
+    }
+}
